@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SticknRip | Mango Ice Cream</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fffbe6;
+      color: #333;
+    }
+    header, footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #ffcc66;
+    }
+    nav {
+      background: #ffb84d;
+      padding: 10px 0;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+    nav a:hover {
+      color: #333;
+    }
+    .main {
+      padding: 30px;
+      text-align: center;
+    }
+    .product-img {
+      max-width: 300px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .button {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 20px;
+      background-color: #ff9900;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .form-section {
+      margin-top: 20px;
+      display: none;
+    }
+    .admin-section {
+      display: none;
+      padding: 20px;
+      background-color: #fff3c2;
+      border-top: 4px solid #ffcc66;
+      color: #333;
+    }
+    table, th, td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+      padding: 8px;
+      width: 100%;
+    }
+    #shutdown-screen {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #fffbe6;
+      z-index: 9999;
+      text-align: center;
+      padding-top: 100px;
+    }
+    #shutdown-screen button {
+      margin-top: 30px;
+      padding: 12px 20px;
+      background-color: #ff9900;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>SticknRip Mango Ice Cream</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="games.html">Games</a>
+    <a href="videos.html">Videos</a>
+  </nav>
+
+  <div class="main" id="main">
+    <img src="file:///Users/kubanychbekadylbekov/Downloads/168842-800-800.png" class="product-img" alt="Mango Ice Cream" />
+    <h2>Propitious Mango Ice Cream</h2>
+    <p>Choose your option to order:</p>
+    <button class="button" onclick="askAddress('Pack ($20)')">Buy a Pack ($20)</button>
+    <button class="button" onclick="askAddress('Individual ($7)')">Buy Individual ($7)</button>
+  </div>
+
+  <!-- ADDRESS FORM -->
+  <div class="main form-section" id="address-form">
+    <h3>Enter Your Home Address</h3>
+    <input type="text" id="userAddress" placeholder="123 Mango Street" style="width: 80%; padding: 10px; margin-bottom: 10px;" />
+    <br />
+    <button class="button" onclick="submitOrder()">Buy</button>
+  </div>
+
+  <!-- ORDER CONFIRMATION -->
+  <div class="main form-section" id="order-confirmation">
+    <h3>✅ Order Received!</h3>
+    <p>Thank you for your purchase.</p>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="admin-section" id="admin-page">
+    <h2>🛠️ Admin Panel</h2>
+    <h3>All Orders:</h3>
+    <table id="orders-table">
+      <tr><th>Order Type</th><th>Address</th></tr>
+    </table>
+    <br />
+    <button class="button" onclick="shutdownSite()">Shut Down Website</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 SticknRip VPS</p>
+    <a href="#" onclick="adminLogin()">Admin Login</a>
+  </footer>
+
+  <!-- SHUTDOWN SCREEN -->
+  <div id="shutdown-screen">
+    <h1>🚧 SticknRip is under maintenance</h1>
+    <p>Please check back later!</p>
+    <button onclick="reopenSite()">Open Website (Admin)</button>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    let currentOrderType = "";
+    let allOrders = [];
+
+    function askAddress(type) {
+      currentOrderType = type;
+      document.getElementById("address-form").style.display = "block";
+    }
+
+    function submitOrder() {
+      const address = document.getElementById("userAddress").value;
+      if (!address) return alert("Please enter an address.");
+      allOrders.push({ type: currentOrderType, address });
+      document.getElementById("order-confirmation").style.display = "block";
+      document.getElementById("address-form").style.display = "none";
+    }
+
+    function adminLogin() {
+      const pass = prompt("Enter admin password:");
+      if (pass === "bfdi2763") {
+        const table = document.getElementById("orders-table");
+        table.innerHTML = '<tr><th>Order Type</th><th>Address</th></tr>';
+        allOrders.forEach(order => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${order.type}</td><td>${order.address}</td>`;
+          table.appendChild(row);
+        });
+        document.getElementById("admin-page").style.display = "block";
+      } else {
+        alert("Wrong password.");
+      }
+    }
+
+    function shutdownSite() {
+      document.getElementById("shutdown-screen").style.display = "block";
+      document.body.style.overflow = "hidden";
+    }
+
+    function reopenSite() {
+      const pass = prompt("Enter admin password to reopen:");
+      if (pass === "bfdi2763") {
+        document.getElementById("shutdown-screen").style.display = "none";
+        document.body.style.overflow = "auto";
+      } else {
+        alert("Wrong password.");
+      }
+    }
+  </script>
+</body>
+</html>

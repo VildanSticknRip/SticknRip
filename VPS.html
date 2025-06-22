@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SticknRip | Viral Product Shop (VPS)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fffbe6;
+      color: #333;
+    }
+
+    header, footer {
+      background-color: #ff6f61;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    nav {
+      background: #ff9671;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      background: #ff6f61;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .product {
+      background-color: #fff3c2;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .product img {
+      max-width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product h3 {
+      margin: 15px 0 10px;
+    }
+
+    .price {
+      color: #cc6600;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .buy-btn {
+      background-color: #ff9900;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .buy-btn:hover {
+      background-color: #e67e00;
+    }
+
+    .admin-btn {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #fff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #shutdown-screen {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #fffbe6;
+      z-index: 9999;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    #shutdown-screen h1 {
+      color: #333;
+    }
+
+    #shutdown-screen button {
+      margin-top: 30px;
+      padding: 12px 20px;
+      background-color: #ff9900;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🛍️ SticknRip Viral Product Shop (VPS)</h1>
+    <p>Cool, weird, and viral products from the SticknRip universe!</p>
+  </header>
+
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="videos.html">🎬 Videos</a>
+    <a href="shop.html">🛒 Shop</a>
+    <a href="games.html">🎮 Games</a>
+  </nav>
+
+  <div class="products">
+
+    <!-- PRODUCT 1 -->
+    <div class="product">
+      <img src="file:///Users/kubanychbekadylbekov/Downloads/168842-800-800.png" alt="Mango Ice Cream" />
+      <h3>Mango Ice Cream</h3>
+      <p class="price">$7 or $20 (pack)</p>
+      <a href="mango-ice-cream.html">
+        <button class="buy-btn">Order</button>
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2025 SticknRip VPS</p>
+    <span class="admin-btn" onclick="adminLogin()">Admin Login</span>
+  </footer>
+
+  <!-- SHUTDOWN SCREEN -->
+  <div id="shutdown-screen">
+    <h1>🚧 SticknRip is under maintenance</h1>
+    <p>Please check back later!</p>
+    <button onclick="reopenSite()">Open Website (Admin)</button>
+  </div>
+
+  <script>
+    function adminLogin() {
+      const pass = prompt("Enter admin password:");
+      if (pass === "BFDI2763") {
+        const choice = confirm("Do you want to shut down the website?");
+        if (choice) shutdownSite();
+      } else {
+        alert("Wrong password.");
+      }
+    }
+
+    function shutdownSite() {
+      document.getElementById("shutdown-screen").style.display = "block";
+      document.body.style.overflow = "hidden";
+    }
+
+    function reopenSite() {
+      const pass = prompt("Enter admin password to reopen:");
+      if (pass === "BFDI2763") {
+        document.getElementById("shutdown-screen").style.display = "none";
+        document.body.style.overflow = "auto";
+      } else {
+        alert("Wrong password.");
+      }
+    }
+  </script>
+
+</body>
+</html>

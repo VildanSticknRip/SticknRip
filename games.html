@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SticknRip | Games</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0077cc; /* blue background */
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      background: #005fa3; /* darker blue */
+      padding: 12px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    nav a {
+      margin: 0 15px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+    nav a:hover {
+      color: #ffcc00; /* yellow highlight */
+    }
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+      text-shadow: 1px 1px 3px #003355;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      width: 260px;
+    }
+    button {
+      font-size: 1.4rem;
+      padding: 15px 0;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    button#playTerrascape {
+      background-color: #ffcc00;
+      color: #005fa3;
+    }
+    button#playTerrascape:hover {
+      background-color: #e6b800;
+      color: #003d66;
+    }
+    button#options {
+      background-color: #004080;
+      color: #fff;
+    }
+    button#options:hover {
+      background-color: #0059b3;
+    }
+    button#exitGame {
+      background-color: #990000;
+      color: #fff;
+    }
+    button#exitGame:hover {
+      background-color: #cc0000;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="games.html" aria-current="page">Games</a>
+    <a href="videos.html">Videos</a>
+    <a href="VPS.html">VPS</a>
+  </nav>
+
+  <main>
+    <h1>Available Games</h1>
+    <div class="button-group">
+      <button id="playTerrascape" type="button" aria-label="Play Terrascape" title="Play Terrascape">
+        Play Terrascape
+      </button>
+      <button id="options" type="button" aria-label="Options" title="Options">
+        Options
+      </button>
+      <button id="exitGame" type="button" aria-label="Exit Game" title="Exit Game">
+        Exit Game
+      </button>
+    </div>
+  </main>
+
+  <script>
+    // Redirect Play Terrascape to terrascape.html
+    document.getElementById('playTerrascape').addEventListener('click', () => {
+      window.location.href = 'terrascape.html';
+    });
+
+    // Options button placeholder
+    document.getElementById('options').addEventListener('click', () => {
+      alert('Options menu coming soon!');
+    });
+
+    // Exit Game button placeholder
+    document.getElementById('exitGame').addEventListener('click', () => {
+      alert('Thanks for playing! Close the tab to exit.');
+    });
+  </script>
+</body>
+</html>

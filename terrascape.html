@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Terrascape Alpha 1.0 (Web)</title>
+<style>
+  body {
+    margin: 0; font-family: Arial, sans-serif; background: #000;
+    color: white; text-align: center;
+  }
+  #menu, #playPage, #gameContainer, #optionsPage, #howToPlayPage, #defianePage {
+    display: none;
+    padding: 20px;
+  }
+  #menu.active, #playPage.active, #gameContainer.active, #optionsPage.active, #howToPlayPage.active, #defianePage.active {
+    display: block;
+  }
+  button {
+    font-size: 24px; margin: 10px; padding: 10px 30px;
+    cursor: pointer; border: none; border-radius: 5px;
+  }
+  #gameCanvas {
+    background: #7CC242;
+    display: block;
+    margin: 20px auto;
+    image-rendering: pixelated;
+    border: 3px solid #444;
+  }
+  input[type=text] {
+    font-size: 20px; padding: 5px; width: 150px;
+    text-align: center;
+  }
+
+  /* Defiane event styles */
+  #defianePage {
+    background: #8B0000; /* blood red */
+    position: relative;
+    height: 700px;
+    user-select: none;
+  }
+  #defianeText {
+    font-size: 4rem;
+    color: #550000;
+    text-shadow: 2px 2px 8px black;
+    margin: 40px 0 20px 0;
+    font-weight: bold;
+  }
+  #defianeFigure {
+    position: absolute;
+    bottom: 50px;
+    left: -150px; /* start off screen */
+    width: 120px;
+    height: 200px;
+    background: linear-gradient(to bottom, #5a0000, #2a0000);
+    border-radius: 20px;
+    box-shadow: 0 0 15px 3px darkred inset;
+    z-index: 1000;
+  }
+  #bloodSword {
+    position: absolute;
+    top: 40px;
+    right: -30px;
+    width: 30px;
+    height: 100px;
+    background: linear-gradient(45deg, #8B0000, #4B0000);
+    clip-path: polygon(50% 0%, 65% 15%, 60% 100%, 40% 100%, 35% 15%);
+    box-shadow: 0 0 10px 2px red;
+  }
+  #playerPlaceholder {
+    position: absolute;
+    bottom: 50px;
+    right: 100px;
+    width: 80px;
+    height: 140px;
+    background-color: #222;
+    border-radius: 15px;
+    z-index: 900;
+  }
+</style>
+</head>
+<body>
+
+<div id="menu" class="active">
+  <h1>Terrascape Alpha 1.0</h1>
+  <button id="btnPlay">Play</button><br/>
+  <button id="btnOptions">Options</button><br/>
+  <button id="btnHowTo">How to Play</button><br/>
+  <button id="btnQuit">Quit</button>
+</div>
+
+<div id="playPage">
+  <h2>Enter World ID (any text):</h2>
+  <input type="text" id="worldIdInput" placeholder="World ID" />
+  <br/><br/>
+  <button id="btnStartGame">Start Game</button><br/><br/>
+  <button id="btnBackToMenu1">Back to Menu</button>
+</div>
+
+<div id="optionsPage">
+  <h2>Options (coming soon)</h2>
+  <button id="btnBackToMenu2">Back to Menu</button>
+</div>
+
+<div id="howToPlayPage">
+  <h2>How to Play</h2>
+  <p>Use <b>WASD</b> keys to move.<br/>Click blocks to break them.<br/>Find and break the yellow win block to win!</p>
+  <button id="btnBackToMenu3">Back to Menu</button>
+</div>
+
+<div id="gameContainer">
+  <canvas id="gameCanvas" width="640" height="640"></canvas>
+  <p>Use WASD to move. Click blocks to break. Red square = player. Yellow = Win block.</p>
+  <button id="btnBackToMenu4">Exit to Menu</button>
+</div>
+
+<!-- Defiane event container -->
+<div id="defianePage">
+  <div id="defianeText">DEFIANE IS COMING</div>
+  <div id="defianeFigure">
+    <div id="bloodSword"></div>
+  </div>
+  <div id="playerPlaceholder"></div>
+</div>
+
+<script>
+(() => {
+  // DOM references
+  const menu = document.getElementById('menu');
+  const playPage = document.getElementById('playPage');
+  const optionsPage = document.getElementById('optionsPage');
+  const howToPlayPage = document.getElementById('howToPlayPage');
+  const gameContainer = document.getElementById('gameContainer');
+  const defianePage = document.getElementById('defianePage');
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const worldIdInput = document.getElementById('worldIdInput');
+
+  const GRID_SIZE = 20;  // Smaller grid for performance in browser (can be 64 for full)
+  const TILE_SIZE = 32;
+
+  let world = [];
+  let playerX = 0;
+  let playerY = 0;
+  const WIN_BLOCK = 9;
+
+  let defianeActive = false;
+  let defianePos = -150;
+  const defianeSpeed = 3; // pixels per frame
+
+  function showPage(page) {
+    [menu, playPage, optionsPage, howToPlayPage, gameContainer, defianePage].forEach(p => p.classList.remove('active'));
+    page.classList.add('active');
+  }
+
+  // Simple seeded random generator (sfc32)
+  function sfc32(a, b, c, d) {
+    return function() {
+      a |= 0; b |= 0; c |= 0; d |= 0;
+      var t = (a + b) | 0;
+      a = b ^ (b >>> 9);
+      b = (c + (c << 3)) | 0;
+      c = (c << 21) | (c >>> 11);
+      d = (d + 1) | 0;
+      t = (t + d) | 0;
+      c = (c + t) | 0;
+      return (t >>> 0) / 4294967296;
+    }
+  }
+
+  function xfnv1a(str) {
+    for(var i=0,h=2166136261>>>0;i<str.length;i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+    }
+    return () => h;
+  }
+
+  function seededRandom(seedStr) {
+    const seed = xfnv1a(seedStr)();
+    return sfc32(seed, seed, seed, seed);
+  }
+
+  function generateWorld(seedStr) {
+    const rand = seededRandom(seedStr);
+    world = new Array(GRID_SIZE);
+    for(let y=0; y<GRID_SIZE; y++) {
+      world[y] = new Array(GRID_SIZE);
+      for(let x=0; x<GRID_SIZE; x++) {
+        const r = rand();
+        if (r > 0.85) world[y][x] = 1;        // tree
+        else if (r > 0.7) world[y][x] = 2;   // rock
+        else world[y][x] = 0;                // grass
+      }
+    }
+    // Place win block somewhere
+    const wx = Math.floor(rand() * GRID_SIZE);
+    const wy = Math.floor(rand() * GRID_SIZE);
+    world[wy][wx] = WIN_BLOCK;
+
+    // Start player in center
+    playerX = Math.floor(GRID_SIZE / 2);
+    playerY = Math.floor(GRID_SIZE / 2);
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let y=0; y<GRID_SIZE; y++) {
+      for(let x=0; x<GRID_SIZE; x++) {
+        switch(world[y][x]) {
+          case 0: ctx.fillStyle = '#7CC242'; break; // grass
+          case 1: ctx.fillStyle = '#116611'; break; // tree
+          case 2: ctx.fillStyle = '#888888'; break; // rock
+          case WIN_BLOCK: ctx.fillStyle = '#FFD700'; break; // win block yellow
+          default: ctx.fillStyle = '#000000';
+        }
+        ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        ctx.strokeStyle = '#444';
+        ctx.strokeRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      }
+    }
+    // Draw player
+    ctx.fillStyle = 'red';
+    ctx.fillRect(playerX * TILE_SIZE, playerY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    ctx.strokeStyle = 'black';
+    ctx.strokeRect(playerX * TILE_SIZE, playerY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+
+  function canWalk(x,y) {
+    if (x < 0 || y < 0 || x >= GRID_SIZE || y >= GRID_SIZE) return false;
+    // Can walk on grass (0) or on win block for now
+    return world[y][x] === 0 || world[y][x] === WIN_BLOCK;
+  }
+
+  function movePlayer(dx, dy) {
+    let nx = playerX + dx;
+    let ny = playerY + dy;
+    if (canWalk(nx, ny)) {
+      playerX = nx;
+      playerY = ny;
+      draw();
+      if (world[playerY][playerX] === WIN_BLOCK) {
+        alert('You found the win block! You win! Returning to menu...');
+        showPage(menu);
+      }
+    }
+  }
+
+  // Break block at position if adjacent and clicked
+  function breakBlock(x,y) {
+    if (Math.abs(x - playerX) + Math.abs(y - playerY) !== 1) return; // must be adjacent
+    if (world[y][x] === WIN_BLOCK) {
+      alert('You found the win block! You win! Returning to menu...');
+      showPage(menu);
+      return;
+    }
+    world[y][x] = 0; // break block to grass
+    draw();
+  }
+
+  document.getElementById('btnPlay').onclick = () => showPage(playPage);
+  document.getElementById('btnOptions').onclick = () => showPage(optionsPage);
+  document.getElementById('btnHowTo').onclick = () => showPage(howToPlayPage);
+  document.getElementById('btnQuit').onclick = () => alert('Thanks for playing! Close the tab to quit.');
+
+  document.getElementById('btnBackToMenu1').onclick = () => showPage(menu);
+  document.getElementById('btnBackToMenu2').onclick = () => showPage(menu);
+  document.getElementById('btnBackToMenu3').onclick = () => showPage(menu);
+  document.getElementById('btnBackToMenu4').onclick = () => showPage(menu);
+
+  document.getElementById('btnStartGame').onclick = () => {
+    const id = worldIdInput.value.trim();
+    if (id.length === 0) {
+      alert('Please enter a World ID!');
+      return;
+    }
+
+    if(id === '666') {
+      startDefianeEvent();
+    } else {
+      generateWorld(id);
+      draw();
+      showPage(gameContainer);
+    }
+  };
+
+  window.addEventListener('keydown', e => {
+    if (!gameContainer.classList.contains('active')) return;
+    switch(e.key.toLowerCase()) {
+      case 'w': movePlayer(0, -1); break;
+      case 'a': movePlayer(-1, 0); break;
+      case 's': movePlayer(0, 1); break;
+      case 'd': movePlayer(1, 0); break;
+    }
+  });
+
+  canvas.addEventListener('click', e => {
+    if (!gameContainer.classList.contains('active')) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const x = Math.floor(cx / TILE_SIZE);
+    const y = Math.floor(cy / TILE_SIZE);
+    breakBlock(x, y);
+  });
+
+  // ===== Defiane event =====
+  const defianeText = document.getElementById('defianeText');
+  const defianeFigure = document.getElementById('defianeFigure');
+  const playerPlaceholder = document.getElementById('playerPlaceholder');
+
+  function startDefianeEvent() {
+    defianeActive = true;
+    defianePos = -150;
+
+    showPage(defianePage);
+
+    defianeText.style.color = '#550000';
+    defianeText.textContent = 'DEFIANE IS COMING';
+
+    defianeFigure.style.left = defianePos + 'px';
+    defianeFigure.style.display = 'block';
+    playerPlaceholder.style.display = 'block';
+
+    requestAnimationFrame(moveDefiane);
+  }
+
+  function moveDefiane() {
+    if (!defianeActive) return;
+
+    defianePos += defianeSpeed;
+    defianeFigure.style.left = defianePos + 'px';
+
+    const defianeRight = defianePos + defianeFigure.offsetWidth;
+    const playerLeft = playerPlaceholder.offsetLeft;
+
+    if (defianeRight >= playerLeft) {
+      playerDies();
+    } else {
+      requestAnimationFrame(moveDefiane);
+    }
+  }
+
+  function playerDies() {
+    defianeActive = false;
+    alert('Defiane reached you. You died.');
+
+    // Reset and go back to menu
+    showPage(menu);
+  }
+
+  // Initialize with menu shown
+  showPage(menu);
+
+})();
+</script>
+
+</body>
+</html>
